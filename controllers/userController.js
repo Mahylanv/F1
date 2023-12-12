@@ -57,9 +57,21 @@ exports.loginRegister = async(req, res) => {
 }
 
 
-exports.updateRegister = async (req, res) => {
+exports.updateRegisterPatch = async (req, res) => {
     try {
         const user = await User.findByIdAndUpdate(req.params._id, req.body, {new: true});
+        res.status(200);
+        res.json(user);
+    } catch (error) {
+        res.status(500);
+        console.log(error);
+        res.json({ message: "Erreur serveur" })
+    }
+};
+
+exports.updateRegisterPut = async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(req.params._id, req.body, {new: true, overwrite: true});
         res.status(200);
         res.json(user);
     } catch (error) {

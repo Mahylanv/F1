@@ -2,13 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let timerSchema = new Schema({
-    user : {
-        type: String,
+    user_id: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',                
         required: true,
-        unique: true,
     },
-    timer : {
-        type: Number,
+    timer: {
+        type: Number, 
         required: true,
     }
 });

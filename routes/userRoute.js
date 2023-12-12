@@ -22,8 +22,8 @@ router
 router
     .route("/:_id")
         .all(jwtMiddleware.verifyToken)
-        .put(userController.loginRegister)
-        .patch(userController.updateRegister)
+        .patch(userController.updateRegisterPatch)
+        .put(userController.updateRegisterPut)
         .delete(userController.deleteRegister);
 
 module.exports = router;

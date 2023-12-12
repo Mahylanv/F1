@@ -1,11 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const userController = require('../controllers/timerController');
+const timerController = require('../controllers/timerController');
 
 router
-    .route(":_id/timer")
-        .post(userController.userRegister);
-
-
+    .route("/timer")
+        .post(timerController.postTimer);
 
 module.exports = router;
