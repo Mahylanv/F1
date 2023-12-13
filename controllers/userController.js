@@ -15,69 +15,79 @@ exports.hashPassword = async (password) => {
     }
 };
 
-
-exports.userRegister = async(req,res) => {
+exports.userRegister = async (req, res) => {
     try {
         let newUser = new User(req.body);
+        newUser.password = await this.hashPassword(newUser.password);
         const user = await newUser.save();
-        res.status(201).json({message : `User créé : "${user.email}`})
-    }
-    catch (error){
+        res.status(201).json(`{ message: User créé : ${user.email} }`);
+    } catch (error) {
         console.log(error);
-        res.status(401).json({message : "Requete invalide"});
+        res.status(401).json({ message: "Requête invalide" });
     }
-}
+};
 
-exports.loginRegister = async(req, res) => {
+exports.loginRegister = async (req, res) => {
     try {
-        const user = await User.findOne({email: req.body.email})
-        if(!user) {
-            res.status(500).json({message : 'user non trouvé'});
+        const user = await User.findOne({ email: req.body.email });
+        if (!user) {
+            res.status(500).json({ message: 'User non trouvé' });
             return;
         }
-        if(user.email === req.body.email && user.password === req.body.password) {
-                const userData = {
-                    id: user._id,
-                    email: user.email,
-                    role: user.role
-                }
-            
-                const token = await jwt.sign(userData, JWT_KEY, {expiresIn: "10h" })
-                res.status(200).json({token});
-            }
-            else {
-                res.status(401).json({message : "email ou pw incorrect"});
-            }
-    }
-    catch (error) {
+
+        const passwordMatch = await bcrypt.compare(req.body.password, user.password);
+        if (passwordMatch) {
+            const userData = {
+                id: user._id,
+                email: user.email,
+                role: user.role,
+            };
+
+            const token = await jwt.sign(userData, JWT_KEY, { expiresIn: '10h' });
+            res.status(200).json({ token });
+        } else {
+            res.status(401).json({ message: "Email ou pw incorrect" });
+        }
+    } catch (error) {
         console.log(error);
-        res.status(500).json({message : "impossible de generer le token"});
+        res.status(500).json({ message: "Impossible de générer le token" });
     }
-        
-}
+};
 
 
 exports.updateRegisterPatch = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params._id, req.body, {new: true});
-        res.status(200);
-        res.json(user);
+        if (req.body.password) {
+            req.body.password = await bcrypt.hash(req.body.password, saltRounds);
+        }
+
+        const user = await User.findByIdAndUpdate(req.params._id, req.body, { new: true });
+        if (!user) {
+            res.status(404).json({ message: 'User non trouvé' });
+            return;
+        }
+        res.status(200).json(user);
     } catch (error) {
-        res.status(500);
         console.log(error);
-        res.json({ message: "Erreur serveur" })
+        res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
 exports.updateRegisterPut = async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params._id, req.body, {new: true, overwrite: true});
-        res.status(200);
-        res.json(user);
+        if (req.body.password) {
+            req.body.password = await bcrypt.hash(req.body.password, saltRounds);
+        }
+
+        const user = await User.findByIdAndUpdate(req.params._id, req.body, { new: true, overwrite: true });
+        if (!user) {
+            res.status(404).json({ message: 'User non trouvé' });
+            return;
+        }
+        res.status(200).json(user);
     } catch (error) {
-        res.status(500);
-        console.log(error);
-        res.json({ message: "Erreur serveur" })
+        console.error(error);
+        res.status(500).json({ message: "Erreur serveur" });
     }
 };
 
@@ -93,3 +103,22 @@ exports.deleteRegister = async (req, res) => {
     }
 }
     
+exports.postTimer = async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        const { timer } = req.body;
+
+        const newTimer = new Timer({
+            user_id,
+            timer,
+        });
+
+        await newTimer.save();
+
+        res.status(201).json({ message: "Nouveau temps enregistré" });
+    } catch (error) {
+        console.log(error);
+        // console.log(req.params)
+        res.status(500).json({ message: "Erreur serveur" });
+    }
+};

@@ -10,7 +10,7 @@ let timerSchema = new Schema({
     timer: {
         type: Number, 
         required: true,
-    }
+    },
 });
 
 module.exports = mongoose.model('Timer', timerSchema);
