@@ -11,7 +11,7 @@ app.use(express.json());
 const userRoute = require("./routes/userRoute");
 app.use('/users', userRoute);
 
-const timerRoute = require("./routes/timerRoute");
-app.use('/:user_id', timerRoute);
+const timerRoute = require('./routes/timerRoute');
+app.use('/timer', timerRoute);
 
 app.listen(port, host);
